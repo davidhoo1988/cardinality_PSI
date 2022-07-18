@@ -48,12 +48,13 @@ namespace PSI {
                 // parameters.optimal_parameters.table_size = 4500;
                 std::cout << "Number of hash functions used in BF: " << parameters.optimal_parameters.number_of_hashes << std::endl;
                 std::cout << "Size of table used in BF:  " << parameters.optimal_parameters.table_size << std::endl;
+                // version PSI::FDB or PSI::HDB
                 std::cout << "PSI version: " << version << std::endl;
                 // Instantiate Bloom Filter for the client side, say C=[0,...,99]
                 bloom_filter filter(parameters);
                 // Insert some numbers
                 for (std::size_t i = 0; i < parameters.projected_element_count; ++i){
-                        filter.insert(i+70);
+                        filter.insert(i);
                 }
                 auto bit_table_pointer = filter.table();
                 // std::cout << "Bit Table for BF: " << std::endl;
@@ -65,7 +66,7 @@ namespace PSI {
                 // Prepare the set of the server side, say S=[70,...,169]
                 std::vector<std::size_t> set_S(parameters.projected_element_count);
                 for (std::size_t i = 0; i < parameters.projected_element_count; i++)
-                        set_S[i] = i;
+                        set_S[i] = i+70;
                 
 
                 /****************************************************
@@ -91,7 +92,7 @@ namespace PSI {
 
                                       
                 std::vector<fbscrypto::LWECiphertext> encrypted_BF;
-                for (int i = 0; i < parameters.optimal_parameters.table_size/bits_per_char; i++){ // LWE encrypt B.F.
+                for (int i = 0; i < parameters.optimal_parameters.table_size/bits_per_char; i++){ // LWE encrypt B.F of the client's.
                         uint64_t mod = modulus;
                         int64_t val;
                         for (int j = 0; j < bits_per_char; j++){
@@ -119,7 +120,7 @@ namespace PSI {
                 // }
                 // c = getchar();
                 /****************************************************
-                 *                      perform eSPI_CA
+                 *                      perform eSPI_CA on server side
                  * **************************************************/
                 
                 // auto ct1 = encrypted_BF[0];
@@ -129,11 +130,11 @@ namespace PSI {
                 data.ctx.Decrypt(key, ct, &pt);
                 pt = data.ctx.Decode(pt, modulus, fbscrypto::BEFORE_KEYSWITCH);
                 std::cout << std::dec << "|C \\cap S| result: " << pt << std::endl;
-                auto c = getchar();
+                auto c = getchar(); // pause here
 
                 /****************************************************
                  * perform post-processing, homomorphically generate 
-                 * session key K if below threshold; 
+                 * session key K (assume K = 0) if below threshold; 
                  * Otherwise, generate random R
                  * **************************************************/
                 auto ct_ks = data.ctx.Finalize(ct, fbscrypto::SKIP_STEP::KEYSWITCH);               

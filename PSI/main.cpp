@@ -5,8 +5,7 @@ using namespace PSI;
 
 
 int main() {
-    std::cout << std::endl << "### RUNNING NEURAL NETWORK EVALUATION ###" << std::endl;
-    std::cout << "## TESTING MNIST 1 ##" << std::endl;
+    std::cout << std::endl << "### RUNNING threshold PSI EVALUATION ###" << std::endl;
     uint32_t m_min = 7, m_max = 7;
     for(uint32_t m = m_min; m <= m_max; m++) {
         std::cout << "[Using modulus = " << ((1 << m)) << "]" << std::endl;
